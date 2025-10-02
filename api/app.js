@@ -7,8 +7,14 @@ var cors = require('cors');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 testAPIRouter = require("./routes/testAPI");
+// Connect DB and auth routes
+const connectDB = require('./config/db');
+const authRoutes = require('./authenticationRoutes/RegistrationEndpoint');
 
 var app = express();
+
+// Connect to MongoDB
+connectDB();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -25,8 +31,15 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/testAPI", testAPIRouter)
 
+// Mount auth routes at /api/auth
+app.use('/api/auth', authRoutes);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
+  // If request looks like an API call, return JSON 404 instead of rendering an HTML page
+  if (req.originalUrl && req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
   next(createError(404));
 });
 
@@ -36,9 +49,13 @@ app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // For API requests return JSON; otherwise render the HTML error page
+  if (req.originalUrl && req.originalUrl.startsWith('/api')) {
+    res.status(err.status || 500).json({ message: err.message || 'Server error' });
+  } else {
+    res.status(err.status || 500);
+    res.render('error');
+  }
 });
 
 module.exports = app;

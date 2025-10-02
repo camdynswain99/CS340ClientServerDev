@@ -1,8 +1,21 @@
-'use strict';
-var http = require('http');
-var port = process.env.PORT || 1337;
+// server/server.js or app.js
+const express = require('express');
+const connectDB = require('./config/db');  // DB connection
+const authRoutes = require('./routes/authRoutes');  // Auth routes
 
-http.createServer(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Hello World\n');
-}).listen(port);
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoutes);
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
