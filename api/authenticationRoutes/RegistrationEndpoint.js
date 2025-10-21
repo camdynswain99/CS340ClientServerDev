@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // model path relative to this file
 const jwt = require('jsonwebtoken');
+const verifyToken = require('../middleware/verifyToken');
+
+
+//This handles login, registration, logout, and getting current user info
 
 // Secret for JWT signing - in production set process.env.JWT_SECRET
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';
@@ -51,15 +55,38 @@ router.post('/login', async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Create JWT
-    const payload = { id: user._id, username: user.username };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    // Makes a JWT token and sets it as an HttpOnly cookie and sends it to client
+      const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token, user: { id: user._id, username: user.username, email: user.email } });
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 1000,
+      });
+
+      // send user info only
+      res.json({ user: { id: user._id, username: user.username, email: user.email } });
+
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+//logout endpoint
+router.post('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+  res.json({ message: 'Logged out' });
+});
+
+// Middleware to verify JWT from HttpOnly cookie
+router.get('/me', verifyToken, (req, res) => {
+  res.json({ user: req.user }); // user populated by middleware
 });
 
 // Export router so the main app can mount it at /api/auth
