@@ -1,25 +1,26 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var cors = require('cors');
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-testAPIRouter = require("./routes/testAPI");
-// Connect DB and auth routes
-const connectDB = require('./config/db');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require('cors');
+
+// Routes
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const testAPIRouter = require('./routes/testAPI');
+const noteRoutes = require('./routes/noteRoutes');
 const authRoutes = require('./authenticationRoutes/RegistrationEndpoint');
 
-var app = express();
+// DB
+const connectDB = require('./config/db');
+
+const app = express();
 
 // Connect to MongoDB
 connectDB();
+console.log('MongoDB connected');
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
+// --- Middleware ---
 app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
@@ -27,35 +28,37 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- View engine setup ---
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+// --- Routes ---
+// Jade pages / legacy routes
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use("/testAPI", testAPIRouter)
+app.use('/testAPI', testAPIRouter);
 
-// Mount auth routes at /api/auth
+// API routes
+app.use('/api/notes', noteRoutes);
 app.use('/api/auth', authRoutes);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  // If request looks like an API call, return JSON 404 instead of rendering an HTML page
-  if (req.originalUrl && req.originalUrl.startsWith('/api')) {
+// --- 404 handler ---
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith('/api')) {
     return res.status(404).json({ message: 'API endpoint not found' });
   }
-  next(createError(404));
+  res.status(404).render('error');
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // For API requests return JSON; otherwise render the HTML error page
-  if (req.originalUrl && req.originalUrl.startsWith('/api')) {
+// --- General error handler ---
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  if (req.originalUrl.startsWith('/api')) {
     res.status(err.status || 500).json({ message: err.message || 'Server error' });
   } else {
-    res.status(err.status || 500);
-    res.render('error');
+    res.status(err.status || 500).render('error');
   }
 });
 
+// Export app for bin/www
 module.exports = app;
