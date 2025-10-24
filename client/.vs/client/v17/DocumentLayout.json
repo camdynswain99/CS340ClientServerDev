@@ -1,3 +1,23 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1e7b892d81ffec4432085fb0e69bac97a7ce100913800f4743f0f4ff0e524dc1
-size 540
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\jscot\\Desktop\\CS 340\\NodejsWebApp1\\client\\",
+  "Documents": [],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
