@@ -1,6 +1,0 @@
-client/src/* !text !filter !merge !diff
-client/public/* !text !filter !merge !diff
-client/package.json !text !filter !merge !diff
-client/package-lock.json !text !filter !merge !diff
-client/README.md !text !filter !merge !diff
-* !text !filter !merge !diff
