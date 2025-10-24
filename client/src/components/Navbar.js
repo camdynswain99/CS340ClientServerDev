@@ -1,3 +1,21 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:2176e6646da06ca6c8ba2c12cea69c0c5fa93db9d36ce32866a73a0cf2cd3cf2
-size 752
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Navbar = ({ isAuthenticated, onSignOut }) => (
+  <ul className="menu">
+    <li><Link to="/">Home</Link></li>
+    <li><Link to="/about">About</Link></li>
+    <li><Link to="/services">Services</Link></li>
+    <li><Link to="/contact">Contact</Link></li>
+    {!isAuthenticated && <li><Link to="/signin">Sign In</Link></li>}
+    {!isAuthenticated && <li><Link to="/signup">Sign Up</Link></li>}
+    {isAuthenticated && <li><Link to="/YourNotesPage">Dashboard</Link></li>}
+    {isAuthenticated && (
+      <li className="spacer">
+        <button className="SignOutButton" onClick={onSignOut}>Sign Out</button>
+      </li>
+    )}
+  </ul>
+);
+
+export default Navbar;
