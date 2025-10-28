@@ -10,6 +10,7 @@ const usersRouter = require('./routes/users');
 const testAPIRouter = require('./routes/testAPI');
 const noteRoutes = require('./routes/noteRoutes');
 const authRoutes = require('./authenticationRoutes/RegistrationEndpoint');
+const gpt2Route = require('./routes/gpt2');
 
 // DB
 const connectDB = require('./config/db');
@@ -41,6 +42,7 @@ app.use('/testAPI', testAPIRouter);
 // API routes
 app.use('/api/notes', noteRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/generate', gpt2Route);
 
 // --- 404 handler ---
 app.use((req, res, next) => {

@@ -8,12 +8,15 @@ function GPT2TestPage() {
 
   const handleGenerate = async () => {
     try {
-      const res = await axios.post("http://localhost:9000/api/generate", {
-        prompt,
-      });
-      setResponse(res.data.text);
+      // Use relative path so React dev server proxy (client/package.json) forwards to the API
+      const res = await axios.post("/api/generate", { prompt });
+      console.log('generate response:', res);
+      // The Flask server returns { response: text } and the API proxies that through,
+      // so read `res.data.response` here.
+      setResponse(res.data.response || res.data.text || JSON.stringify(res.data));
     } catch (error) {
       console.error("Error generating text", error);
+      console.log("it is getting here");
     }
   };
 

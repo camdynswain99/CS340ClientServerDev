@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 
+#call python gpt2_server.py to run server on port 5001 from cli
+
 app = Flask(__name__)
 
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
