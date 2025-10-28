@@ -7,6 +7,7 @@ const Navbar = ({ isAuthenticated, onSignOut }) => (
     <li><Link to="/about">About</Link></li>
     <li><Link to="/services">Services</Link></li>
     <li><Link to="/contact">Contact</Link></li>
+    <li><Link to="/gpt2testpage">GPT-2 Test</Link></li>
     {!isAuthenticated && <li><Link to="/signin">Sign In</Link></li>}
     {!isAuthenticated && <li><Link to="/signup">Sign Up</Link></li>}
     {isAuthenticated && <li><Link to="/YourNotesPage">Dashboard</Link></li>}
@@ -19,3 +20,4 @@ const Navbar = ({ isAuthenticated, onSignOut }) => (
 );
 
 export default Navbar;
+
