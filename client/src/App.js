@@ -15,6 +15,8 @@ import Services from "./Services.js";
 import SignIn from "./SignInComponents/SignIn";
 import SignUp from "./SignUpComponents/SignUp";
 import HiddenNotesPage from "./components/YourNotesPage";
+import GPT2TestPage from './components/GPT-2TestPage.jsx';
+
 
 
 /**
@@ -67,6 +69,7 @@ export default function AppWithRouter(props) {
       {/* pass setter so SignIn can notify AppWithRouter on success */}
       <Route path="/signin" element={<SignIn onAuthSuccess={() => setUserIsLoggedIn(true)} />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/gpt2testpage" element={<GPT2TestPage />} />
       <Route
         path="/YourNotesPage"
         element={
