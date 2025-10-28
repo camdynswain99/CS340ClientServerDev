@@ -1,3 +1,21 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:548af5f3f6dceab0dd557e1e06562523200ded117ecc2b55ee21f5c4dc997881
-size 495
+import React from "react";
+import './MainContent.css';
+
+function MainContent({ activeNote, onEdit }) {
+  if (!activeNote) {
+    return <p>Select a note to view its content</p>;
+  }
+
+  return (
+    <div className="main-content-container">
+      <button className="main-content-edit-btn" onClick={onEdit}>
+        Edit
+      </button>
+
+      <h2>{activeNote.title}</h2>
+      <p>{activeNote.content || "This note is empty."}</p>
+    </div>
+  );
+}
+
+export default MainContent;

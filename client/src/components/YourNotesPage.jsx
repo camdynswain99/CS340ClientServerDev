@@ -1,3 +1,17 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a6b46b240d4bead085c3f6c484412e32698eb3ad887fdcba59841ba8b92f5828
-size 402
+import React from "react";
+
+export default function Services() {
+  return (
+    <div style={{ padding: "2rem" }}>
+      {/* Title */}
+      <h1 style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>
+        Our Services
+      </h1>
+
+      {/* Description */}
+      <p style={{ fontSize: "1.2rem", marginBottom: "2rem" }}>
+        ITS WORKING!!! ITS WORKING
+      </p>
+    </div>
+  );
+}
