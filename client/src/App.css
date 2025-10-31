@@ -77,3 +77,15 @@ ul.menu li button:hover {
 ul.menu li a.active {
     background-color: #04AA6D;
 }
+
+/* LLM response styling: preserve whitespace and line breaks */
+.llm-response {
+    white-space: pre-wrap; /* preserves newlines and wraps long lines */
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    background: #f6f7fb;
+    padding: 12px;
+    border-radius: 6px;
+    max-width: 100%;
+    overflow: auto;
+    margin-top: 8px;
+}

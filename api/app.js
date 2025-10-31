@@ -11,6 +11,7 @@ const testAPIRouter = require('./routes/testAPI');
 const noteRoutes = require('./routes/noteRoutes');
 const authRoutes = require('./authenticationRoutes/RegistrationEndpoint');
 const gpt2Route = require('./routes/gpt2');
+const ollamaRouter = require('./routes/ollama');
 
 // DB
 const connectDB = require('./config/db');
@@ -43,6 +44,7 @@ app.use('/testAPI', testAPIRouter);
 app.use('/api/notes', noteRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/generate', gpt2Route);
+app.use('/api/ollama', ollamaRouter);
 
 // --- 404 handler ---
 app.use((req, res, next) => {
@@ -61,6 +63,8 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).render('error');
   }
 });
+
+
 
 // Export app for bin/www
 module.exports = app;
