@@ -1,58 +1,30 @@
 const express = require('express');
+const axios = require('axios');
+
 const router = express.Router();
 
-//install ollama and run the command below to start the server
-//ollama run llama3.2 
-
-
+// Proxy POST /api/generate -> Flask GPT-2 server at http://localhost:5001/generate
 router.post('/', async (req, res) => {
-  console.log('Received /api/generate request with body:', req.body);
-
+    //this console log helps debug incoming requests
+    console.log('Received /api/generate request with body:', req.body);
   try {
-    const ollamaUrl = 'http://localhost:11434/api/generate';
-    const ollamaRes = await fetch(ollamaUrl, {
-      method: 'POST',
+    // Forward the JSON body to the Flask server
+    const flaskRes = await axios.post('http://localhost:5001/generate', req.body, {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body),
+      timeout: 1200000000, // in ms - model generation can take longer
     });
 
-    if (!ollamaRes.ok) {
-      const text = await ollamaRes.text();
-      console.error('Ollama returned non-OK status', ollamaRes.status, text);
-      return res.status(ollamaRes.status).send(text);
-    }
-
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    for await (const chunk of ollamaRes.body) {
-      buffer += decoder.decode(chunk, { stream: true });
-
-      // Split on newlines because Ollama sends JSONL (one JSON per line)
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep incomplete line
-
-      for (const line of lines) {
-        if (!line.trim()) continue;
-
-        try {
-          const data = JSON.parse(line);
-          if (data.response) res.write(data.response);
-          if (data.done) {
-            res.end();
-            return;
-          }
-        } catch (e) {
-          // Ignore incomplete/partial JSON lines
-        }
-      }
-    }
-
-    res.end();
+    // Return whatever the Flask server returned
+    res.status(flaskRes.status).json(flaskRes.data);
   } catch (err) {
-    console.error('Error proxying to Ollama API:', err);
-    res.status(500).json({ message: 'Error contacting Ollama API', error: err.message });
+    // If Flask responded with an error, forward it
+    if (err.response) {
+      return res.status(err.response.status).json(err.response.data);
+    }
+
+    // Network/other errors
+    console.error('Error proxying to GPT-2 Flask server:', err.message);
+    res.status(500).json({ message: 'Error contacting GPT-2 server', error: err.message });
   }
 });
 
