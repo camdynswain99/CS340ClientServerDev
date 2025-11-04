@@ -13,7 +13,7 @@ function MainContent({ activeNote, onEdit }) {
       </button>
 
       <h2>{activeNote.title}</h2>
-      <p>{activeNote.content || "This note is empty."}</p>
+      <div className="note-content">{activeNote.content || "This note is empty."}</div>
     </div>
   );
 }

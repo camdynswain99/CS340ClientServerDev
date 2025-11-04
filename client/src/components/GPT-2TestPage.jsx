@@ -8,58 +8,25 @@ function GPT2TestPage() {
 
   const handleGenerate = async () => {
     try {
-      // use relative path so CRA dev proxy (client/package.json) works in dev
-      const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama3.2:latest',
-        // send the prompt from state (fallback to a default summary prompt)
-        prompt: prompt || 'Summarize this text...',
-      }),
-    });
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        console.error('Generate error', res.status, txt);
-        setResponse('Error from server: ' + (txt || res.status));
-        return;
-      }
-
-      // If response is streamable, stream it; otherwise fall back to text()
-      if (res.body && typeof res.body.getReader === 'function') {
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let fullText = '';
-
-        // update state incrementally so UI receives streaming updates
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          fullText += chunk;
-          setResponse(fullText);
-        }
-      } else {
-        const txt = await res.text();
-        setResponse(txt);
-      }
-    } catch (err) {
-      console.error('handleGenerate error', err);
-      setResponse('Error: ' + (err.message || err));
+      // Use relative path so React dev server proxy (client/package.json) forwards to the API
+      const res = await axios.post("/api/generate", { prompt });
+      console.log('generate response:', res);
+      // The Flask server returns { response: text } and the API proxies that through,
+      // so read `res.data.response` here.
+      setResponse(res.data.response || res.data.text || JSON.stringify(res.data));
+    } catch (error) {
+      console.error("Error generating text", error);
+      console.log("it is getting here");
     }
   };
 
   return (
     <div>
-      <h1>Ollama test page</h1>
+      <h1>GPT-2 Text Generator</h1>
       <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} />
       <br />
       <button onClick={handleGenerate}>Generate</button>
-      <div>
-        <strong>Response:</strong>
-        <pre className="llm-response">{response}</pre>
-      </div>
+      <p><strong>Response:</strong> {response}</p>
     </div>
   );
 }

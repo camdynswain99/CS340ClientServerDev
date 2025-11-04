@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';
 import NoteEditor from "./NoteEditors/NoteEditor";
+import './MainContent.css';
 
 function HomePage() {
   const [notes, setNotes] = useState([]);
@@ -11,6 +12,8 @@ function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [ollamaResponse, setOllamaResponse] = useState(null);
+  const [ollamaLoading, setOllamaLoading] = useState(false);
 
   // Fetch API example
   useEffect(() => {
@@ -104,6 +107,96 @@ function HomePage() {
     setFolders(prev => [...prev, newFolder]);
   };
 
+  // Send a fixed prompt (based on the active note when available) to local Ollama server
+  const queryOllama = async () => {
+    const instruction = 'Format these notes with bullets, indents, and line spaces where needed. Do not add any information and respond with the formatted notes only.';
+    const noteContent = activeNote && activeNote.content ? String(activeNote.content) : '';
+    const fixedPrompt = noteContent ? `${instruction}\n\n${noteContent}` : `${instruction}\n\n(No note content available)`;
+
+    const payload = {
+      // adjust model name if you use a different Ollama model
+      model: 'llama3.2',
+      prompt: fixedPrompt,
+      // Optional: request parameters depending on your Ollama setup
+      // temperature: 0.7
+    };
+
+    setOllamaLoading(true);
+    setOllamaResponse('');
+
+    try {
+      const res = await fetch('http://localhost:11434/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Ollama returned ${res.status}: ${errText}`);
+      }
+
+      // Ollama streams newline-delimited JSON (NDJSON). Read the stream and parse each line.
+      if (!res.body) {
+        // fallback for environments without streaming support
+        const text = await res.text();
+        try {
+          const json = JSON.parse(text);
+          setOllamaResponse(json.response || json.text || text);
+        } catch (e) {
+          setOllamaResponse(text);
+        }
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      setOllamaResponse('');
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          // Keep last partial line in buffer
+          buffer = lines.pop();
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const obj = JSON.parse(trimmed);
+              const piece = obj.response || obj.text || '';
+              // Append piece to response state
+              setOllamaResponse(prev => (prev || '') + piece);
+            } catch (e) {
+              // If it's not JSON, append raw
+              setOllamaResponse(prev => (prev || '') + trimmed);
+            }
+          }
+        }
+        if (done) {
+          // flush remaining buffer
+          if (buffer.trim()) {
+            const remaining = buffer.trim();
+            try {
+              const obj = JSON.parse(remaining);
+              setOllamaResponse(prev => (prev || '') + (obj.response || obj.text || ''));
+            } catch (e) {
+              setOllamaResponse(prev => (prev || '') + remaining);
+            }
+          }
+          break;
+        }
+      }
+    } catch (err) {
+      console.error('Error calling Ollama:', err);
+      setOllamaResponse('Error: ' + (err.message || String(err)));
+    } finally {
+      setOllamaLoading(false);
+    }
+  };
+
   const filteredNotes = Array.isArray(notes)
   ? notes.filter(note => (note.title || "").toLowerCase().includes(searchQuery.toLowerCase()))
   : [];
@@ -125,10 +218,13 @@ function HomePage() {
       <div style={{ flex: 1, padding: "2rem" }}>
         {editing ? (
           <NoteEditor 
-          note={activeNote} 
-          onSave={saveNote} 
-          onCancel={cancelEdit}
-          onDelete={deleteNote}
+            note={activeNote} 
+            onSave={saveNote} 
+            onCancel={cancelEdit}
+            onDelete={deleteNote}
+            onQueryOllama={queryOllama}
+            ollamaLoading={ollamaLoading}
+            ollamaResponse={ollamaResponse}
           />
         ) : (
           <MainContent activeNote={activeNote} onEdit={startEditing} />
