@@ -5,9 +5,16 @@
 
 .main-content-edit-btn {
   position: absolute;
-  top: 0.5 rem;       /* move higher in the corner */
+  top: 0.5rem;       /* move higher in the corner */
   right: 0.5rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
   z-index: 10;       /* ensures button is above note content */
+}
+
+.note-content {
+  white-space: pre-wrap; /* preserves newlines and sequences of spaces */
+  word-break: break-word; /* wrap long lines */
+  margin-top: 0.75rem;
+  line-height: 1.5;
 }
