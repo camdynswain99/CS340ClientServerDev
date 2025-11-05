@@ -1,0 +1,97 @@
+/* === Layout principal === */
+.layout {
+  display: flex;
+  height: calc(100vh - 4rem);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* === Contenedor principal (zona de notas) === */
+.layout > div {
+  flex: 1;
+  padding: 2rem;
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  border-left: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* === Titulares === */
+h2,
+h3,
+h4 {
+  color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+/* === Inputs, Textareas, botones dentro del contenido === */
+input,
+textarea,
+select {
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-color);
+  outline: none;
+}
+
+/* === Botones generales === */
+button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* === Contenedor vacío o mensaje de bienvenida === */
+.empty-state {
+  text-align: center;
+  color: var(--text-color);
+  opacity: 0.8;
+  padding: 3rem;
+}
+
+/* === Scrollbar estilizado === */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .layout > div {
+    padding: 1rem;
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+  }
+}

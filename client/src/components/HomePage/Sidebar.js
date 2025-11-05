@@ -1,61 +1,75 @@
-// src/components/Sidebar.js
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/components/HomePage/Sidebar.js
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Sidebar.css";
+import "../../Theme.css"; // ✅ CORREGIDO: sube dos niveles hasta src/Theme.css
 
-function Sidebar({ notes, folders, searchQuery, setSearchQuery, createNewNote, createNewFolder, openNote }) {
+function Sidebar({
+  notes,
+  folders,
+  searchQuery,
+  setSearchQuery,
+  createNewNote,
+  createNewFolder,
+  openNote,
+}) {
   const navigate = useNavigate();
+  const uncategorizedNotes = notes.filter((n) => !n.folder);
 
-  const uncategorizedNotes = notes.filter(n => !n.folder);
+  // 🔄 Detectar modo oscuro global
+  const [darkMode, setDarkMode] = useState(false);
+  useEffect(() => {
+    const isDark = localStorage.getItem("theme") === "dark";
+    setDarkMode(isDark);
+  }, []);
 
   return (
-    <div className="sidebar" style={{ width: "250px", padding: "1rem", borderRight: "1px solid #ccc" }}>
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => createNewNote(navigate)} style={{ width: "100%" }}>New Note</button>
+    <div
+      className={`sidebar ${darkMode ? "dark-mode" : ""}`}
+      style={{
+        backgroundColor: "var(--sidebar-bg)",
+        color: "var(--text-color)",
+        borderRight: "1px solid var(--border-color)",
+      }}
+    >
+      <div className="sidebar-header">
+        <button className="btn-primary" onClick={() => createNewNote(navigate)}>
+          + New Note
+        </button>
+        <button className="btn-secondary" onClick={createNewFolder}>
+          + New Folder
+        </button>
       </div>
 
-      <div style={{ marginBottom: "2rem" }}>
-        <button onClick={createNewFolder} style={{ width: "100%" }}>Create Folder</button>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="sidebar-search">
         <input
           type="text"
           placeholder="Search notes..."
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          style={{ width: "100%" }}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {/* Folders list */}
       {folders.length > 0 && (
-        <div>
-          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-            {folders.map(f => (
-              <li key={f._id}>{f.name}</li>
+        <div className="sidebar-section">
+          <h4>Folders</h4>
+          <ul className="sidebar-list">
+            {folders.map((f) => (
+              <li key={f._id || f.id} className="sidebar-item">
+                {f.name}
+              </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Uncategorized notes */}
       {uncategorizedNotes.length > 0 && (
-        <div style={{ marginTop: "2rem" }}>
-          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-            {uncategorizedNotes.map(note => (
-              <li key={note._id}>
-                <button
-                  onClick={() => openNote(note)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "blue",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    padding: 0,
-                    font: "inherit"
-                  }}
-                >
+        <div className="sidebar-section">
+          <h4>Notes</h4>
+          <ul className="sidebar-list">
+            {uncategorizedNotes.map((note) => (
+              <li key={note._id} className="sidebar-item">
+                <button className="note-button" onClick={() => openNote(note)}>
                   {note.title}
                 </button>
               </li>

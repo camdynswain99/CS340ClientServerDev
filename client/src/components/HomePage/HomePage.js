@@ -1,8 +1,9 @@
-// src/components/HomePage/HomePage.js
-import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
-import MainContent from './MainContent';
+import React, { useState, useEffect } from "react";
+import Sidebar from "./Sidebar";
+import MainContent from "./MainContent";
 import NoteEditor from "./NoteEditors/NoteEditor";
+import "../../Theme.css"; // ✅ importa el tema global
+import "./HomePage.css";
 
 function HomePage() {
   const [notes, setNotes] = useState([]);
@@ -12,32 +13,38 @@ function HomePage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [editing, setEditing] = useState(false);
 
-  // Fetch API example
+  // ✅ Mantener sincronía con el modo oscuro global
+  const [darkMode, setDarkMode] = useState(false);
   useEffect(() => {
-    fetch("/api/notes")
-      .then(res => res.json())  // <— parse as JSON, not text
-      .then((data) => setNotes(data))
-      .catch((err) => console.error("Error fetching notes:", err)); 
+    const isDark = localStorage.getItem("theme") === "dark";
+    setDarkMode(isDark);
+    document.body.classList.toggle("dark-mode", isDark);
   }, []);
 
+  // 🔄 Fetch inicial de notas
+  useEffect(() => {
+    fetch("/api/notes")
+      .then((res) => res.json())
+      .then((data) => setNotes(data))
+      .catch((err) => console.error("Error fetching notes:", err));
+  }, []);
 
-  // Create a new note in MongoDB
+  // ✏️ Crear nueva nota
   const createNewNote = async () => {
     try {
-      // Send a POST request to the backend; content/title are required
       const res = await fetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: "Untitled Note",
-          content: "Start writing here...", // <-- cannot be empty
+          content: "Start writing here...",
           type: "quick",
         }),
       });
 
-      const createdNote = await res.json(); // <-- This now has _id from MongoDB
-      setNotes(prev => [createdNote, ...prev]); // add to state
-      setActiveNote(createdNote);              // set as active note
+      const createdNote = await res.json();
+      setNotes((prev) => [createdNote, ...prev]);
+      setActiveNote(createdNote);
       setEditing(true);
       setShowSidebar(false);
     } catch (err) {
@@ -56,7 +63,7 @@ function HomePage() {
     setShowSidebar(false);
   };
 
-  // Save (update) note in MongoDB
+  // 💾 Guardar nota
   const saveNote = async (updatedNote) => {
     if (!updatedNote?._id) {
       console.error("Cannot save note: missing _id");
@@ -70,7 +77,9 @@ function HomePage() {
         body: JSON.stringify(updatedNote),
       });
       const savedNote = await res.json();
-      setNotes(prev => prev.map(n => n._id === savedNote._id ? savedNote : n));
+      setNotes((prev) =>
+        prev.map((n) => (n._id === savedNote._id ? savedNote : n))
+      );
       setActiveNote(savedNote);
       setEditing(false);
       setShowSidebar(true);
@@ -79,12 +88,10 @@ function HomePage() {
     }
   };
 
-  // Delete note from MongoDB
+  // 🗑️ Eliminar nota
   const deleteNote = async (note) => {
     try {
-      await fetch(`/api/notes/${note._id}`, {
-        method: "DELETE",
-      });
+      await fetch(`/api/notes/${note._id}`, { method: "DELETE" });
       setNotes((prev) => prev.filter((n) => n._id !== note._id));
       setActiveNote(null);
       setEditing(false);
@@ -101,15 +108,28 @@ function HomePage() {
 
   const createNewFolder = () => {
     const newFolder = { id: Date.now(), name: "New Folder" };
-    setFolders(prev => [...prev, newFolder]);
+    setFolders((prev) => [...prev, newFolder]);
   };
 
   const filteredNotes = Array.isArray(notes)
-  ? notes.filter(note => (note.title || "").toLowerCase().includes(searchQuery.toLowerCase()))
-  : [];
+    ? notes.filter((note) =>
+        (note.title || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   return (
-    <div className="layout" style={{ display: "flex", marginTop: "2rem" }}>
+    <div
+      className={`layout ${darkMode ? "dark-mode" : ""}`}
+      style={{
+        display: "flex",
+        marginTop: "2rem",
+        backgroundColor: "var(--bg-color)",
+        color: "var(--text-color)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
+      }}
+    >
       {showSidebar && (
         <Sidebar
           notes={filteredNotes}
@@ -124,11 +144,11 @@ function HomePage() {
 
       <div style={{ flex: 1, padding: "2rem" }}>
         {editing ? (
-          <NoteEditor 
-          note={activeNote} 
-          onSave={saveNote} 
-          onCancel={cancelEdit}
-          onDelete={deleteNote}
+          <NoteEditor
+            note={activeNote}
+            onSave={saveNote}
+            onCancel={cancelEdit}
+            onDelete={deleteNote}
           />
         ) : (
           <MainContent activeNote={activeNote} onEdit={startEditing} />

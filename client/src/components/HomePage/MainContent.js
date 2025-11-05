@@ -3,7 +3,11 @@ import './MainContent.css';
 
 function MainContent({ activeNote, onEdit }) {
   if (!activeNote) {
-    return <p>Select a note to view its content</p>;
+    return (
+      <div className="main-content-container empty">
+        <p>Select a note to view its content</p>
+      </div>
+    );
   }
 
   return (
