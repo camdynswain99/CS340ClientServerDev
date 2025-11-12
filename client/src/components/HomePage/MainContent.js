@@ -3,7 +3,11 @@ import './MainContent.css';
 
 function MainContent({ activeNote, onEdit }) {
   if (!activeNote) {
-    return <p>Select a note to view its content</p>;
+    return (
+      <div className="main-content-container empty">
+        <p>Select a note to view its content</p>
+      </div>
+    );
   }
 
   return (
@@ -13,7 +17,7 @@ function MainContent({ activeNote, onEdit }) {
       </button>
 
       <h2>{activeNote.title}</h2>
-      <p>{activeNote.content || "This note is empty."}</p>
+      <div className="note-content">{activeNote.content || "This note is empty."}</div>
     </div>
   );
 }

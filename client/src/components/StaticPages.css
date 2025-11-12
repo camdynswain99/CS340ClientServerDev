@@ -1,0 +1,71 @@
+/* === Estructura general === */
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 80vh;
+  background-color: var(--background);
+  padding: 3rem 1rem;
+  transition: background-color 0.3s ease;
+}
+
+/* === Tarjeta principal === */
+.page-card {
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+  animation: fadeIn 0.4s ease;
+}
+
+/* === Títulos === */
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  border-bottom: 2px solid var(--accent-color);
+  display: inline-block;
+  padding-bottom: 0.3rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+.page-subtitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  color: var(--text-color);
+}
+
+/* === Texto === */
+.page-text {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+/* === Lista === */
+.page-list {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  color: var(--text-color);
+}
+
+.page-list li {
+  margin-bottom: 0.6rem;
+}
+
+/* === Animación === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

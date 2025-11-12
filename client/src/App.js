@@ -1,12 +1,13 @@
-import React from 'react';
-import './App.css';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import "./Theme.css"; // ✅ Importamos el tema global aquí también
 
-import HomePage from './components/HomePage/HomePage';
-import Navbar from './components/Navbar';
-import PrivateRoute from './SignInComponents/PrivateRouteLogin.jsx';
+import { Routes, Route, useNavigate } from "react-router-dom"; // no BrowserRouter aquí
 
-import { Routes, Route, useNavigate } from "react-router-dom";  // no BrowserRouter aquí
+// Components
+import Navbar from "./components/Navbar";
+import HomePage from "./components/HomePage/HomePage";
+import PrivateRoute from "./SignInComponents/PrivateRouteLogin.jsx";
 
 // Pages
 import Contact from "./Contact.js";
@@ -15,70 +16,101 @@ import Services from "./Services.js";
 import SignIn from "./SignInComponents/SignIn";
 import SignUp from "./SignUpComponents/SignUp";
 import HiddenNotesPage from "./components/YourNotesPage";
-import GPT2TestPage from './components/GPT-2TestPage.jsx';
-
-
+import GPT2TestPage from "./components/GPT-2TestPage.jsx";
 
 /**
- * Routes live here. Do NOT wrap with BrowserRouter (it's already in index.js).
+ * Main application with routing.
+ * NOTE: BrowserRouter is already in index.js
  */
 export default function AppWithRouter(props) {
   const navigate = useNavigate();
 
-  // manage auth state here so it can be updated after SignIn
+  // 🔐 Estado de autenticación
   const [userIsLoggedIn, setUserIsLoggedIn] = useState(false);
 
-  // initial check on mount using cookie-based auth
+  // 🎨 Tema oscuro (por si queremos sincronizar en más lugares en el futuro)
+  const [darkMode, setDarkMode] = useState(false);
+
+  // ✅ Cargar modo oscuro guardado en localStorage al iniciar
   useEffect(() => {
-    const base = process.env.REACT_APP_API_URL || '';
-    fetch(`${base}/api/auth/me`, { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error('Not authenticated');
+    const savedMode = localStorage.getItem("theme") === "dark";
+    setDarkMode(savedMode);
+    document.body.classList.toggle("dark-mode", savedMode);
+  }, []);
+
+  // 💾 Guardar preferencia cuando cambia
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  // 🧠 Verificar autenticación al cargar
+  useEffect(() => {
+    const base = process.env.REACT_APP_API_URL || "";
+    fetch(`${base}/api/auth/me`, { credentials: "include" })
+      .then((res) => {
+        if (!res.ok) throw new Error("Not authenticated");
         return res.json();
       })
       .then(() => setUserIsLoggedIn(true))
       .catch(() => setUserIsLoggedIn(false));
   }, []);
 
-  // sign out handler: call server to clear cookie then update UI
+  // 🚪 Cerrar sesión
   const handleSignOut = async () => {
     try {
-      const base = process.env.REACT_APP_API_URL || '';
-      await fetch(`${base}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+      const base = process.env.REACT_APP_API_URL || "";
+      await fetch(`${base}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
     } catch (err) {
-      console.error('Logout failed', err);
+      console.error("Logout failed", err);
     } finally {
       setUserIsLoggedIn(false);
-      navigate('/signin');
+      navigate("/signin");
     }
   };
 
   return (
     <>
-      {/* Navbar always visible; receives auth status */}
-      <Navbar isAuthenticated={userIsLoggedIn} onSignOut={handleSignOut} />
-
-    <Routes>
-      {/* Home (existing UI) */}
-      <Route path="/" element={<HomePage {...props} navigate={navigate} isAuthenticated={userIsLoggedIn} />} />
-
-      {/* New pages */}
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/about" element={<About />} />
-      {/* pass setter so SignIn can notify AppWithRouter on success */}
-      <Route path="/signin" element={<SignIn onAuthSuccess={() => setUserIsLoggedIn(true)} />} />
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/gpt2testpage" element={<GPT2TestPage />} />
-      <Route
-        path="/YourNotesPage"
-        element={
-          <PrivateRoute isAuthenticated={userIsLoggedIn}>
-            {<HiddenNotesPage />}
-          </PrivateRoute>
-        }
+      {/* Navbar siempre visible; recibe auth y control de tema */}
+      <Navbar
+        isAuthenticated={userIsLoggedIn}
+        onSignOut={handleSignOut}
       />
-    </Routes>
-   </>
+
+      {/* Rutas de la aplicación */}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <HomePage
+              {...props}
+              navigate={navigate}
+              isAuthenticated={userIsLoggedIn}
+            />
+          }
+        />
+
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/about" element={<About />} />
+        <Route
+          path="/signin"
+          element={<SignIn onAuthSuccess={() => setUserIsLoggedIn(true)} />}
+        />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/gpt2testpage" element={<GPT2TestPage />} />
+        <Route
+          path="/YourNotesPage"
+          element={
+            <PrivateRoute isAuthenticated={userIsLoggedIn}>
+              <HiddenNotesPage />
+            </PrivateRoute>
+          }
+        />
+      </Routes>
+    </>
   );
 }

@@ -1,39 +1,62 @@
-
-// GPT-2TestPage.jsx
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import "../Theme.css";
+import "./GPT2TestPage.css";
 
 function GPT2TestPage() {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [charCount, setCharCount] = useState(0);
+
+  // 🔄 Cargar último estado guardado
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem("gpt2_prompt");
+    const savedResponse = localStorage.getItem("gpt2_response");
+    if (savedPrompt) setPrompt(savedPrompt);
+    if (savedResponse) setResponse(savedResponse);
+  }, []);
+
+  // 💾 Guardar automáticamente cada cambio
+  useEffect(() => {
+    localStorage.setItem("gpt2_prompt", prompt);
+  }, [prompt]);
+
+  useEffect(() => {
+    localStorage.setItem("gpt2_response", response);
+  }, [response]);
+
+  // 🧮 Contador de caracteres
+  useEffect(() => {
+    setCharCount(prompt.length);
+  }, [prompt]);
 
   const handleGenerate = async () => {
+    setLoading(true);
+    setResponse("");
+
     try {
-      // use relative path so CRA dev proxy (client/package.json) works in dev
-      const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama3.2:latest',
-        // send the prompt from state (fallback to a default summary prompt)
-        prompt: prompt || 'Summarize this text...',
-      }),
-    });
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "llama3.2:latest",
+          prompt: prompt || "Summarize this text...",
+        }),
+      });
 
       if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        console.error('Generate error', res.status, txt);
-        setResponse('Error from server: ' + (txt || res.status));
+        const txt = await res.text().catch(() => "");
+        console.error("Generate error", res.status, txt);
+        setResponse("Error from server: " + (txt || res.status));
+        setLoading(false);
         return;
       }
 
-      // If response is streamable, stream it; otherwise fall back to text()
-      if (res.body && typeof res.body.getReader === 'function') {
+      if (res.body && typeof res.body.getReader === "function") {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let fullText = '';
+        let fullText = "";
 
-        // update state incrementally so UI receives streaming updates
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -46,20 +69,47 @@ function GPT2TestPage() {
         setResponse(txt);
       }
     } catch (err) {
-      console.error('handleGenerate error', err);
-      setResponse('Error: ' + (err.message || err));
+      console.error("handleGenerate error", err);
+      setResponse("Error: " + (err.message || err));
     }
+
+    setLoading(false);
   };
 
   return (
-    <div>
-      <h1>Ollama test page</h1>
-      <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} />
-      <br />
-      <button onClick={handleGenerate}>Generate</button>
-      <div>
-        <strong>Response:</strong>
-        <pre className="llm-response">{response}</pre>
+    <div className="gpt2-page">
+      <div className="gpt2-card">
+        <h1 className="gpt2-title">Ollama Test Page</h1>
+
+        <textarea
+          className="gpt2-textarea"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Write your prompt here..."
+        />
+
+        <div className="gpt2-charcount">
+          {charCount} characters
+        </div>
+
+        <button
+          className="gpt2-btn"
+          onClick={handleGenerate}
+          disabled={loading || !prompt.trim()}
+        >
+          {loading ? (
+            <div className="spinner"></div>
+          ) : (
+            "Generate"
+          )}
+        </button>
+
+        <div className="gpt2-response-container">
+          <h3 className="gpt2-response-title">Response:</h3>
+          <pre className="gpt2-response-box">
+            {response || (loading ? "Generating..." : "Waiting for response...")}
+          </pre>
+        </div>
       </div>
     </div>
   );

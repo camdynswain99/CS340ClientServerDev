@@ -2,6 +2,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import ".Sidebar.css";
+import "../../Theme.css";
 
 // Helper: build folder hierarchy from flat list
 const buildFolderTree = (folders) => {
@@ -36,6 +38,13 @@ function Sidebar({
   const navigate = useNavigate();
   const [openFolders, setOpenFolders] = useState({});
   const [activeDropdown, setActiveDropdown] = useState(null); // track which folder’s + is open
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // 🔄 Detectar modo oscuro global
+  useEffect(() => {
+    const isDark = localStorage.getItem("theme") === "dark";
+    setDarkMode(isDark);
+  }, []);
 
   const toggleFolder = (folderId) => {
     setOpenFolders(prev => ({
@@ -184,7 +193,7 @@ function Sidebar({
 
   return (
     <div 
-      className="sidebar" 
+      className={`sidebar ${darkMode ? "dark-mode" : ""}`} 
       style={{ 
         width: "250px", 
         padding: "1rem", 
@@ -209,8 +218,7 @@ function Sidebar({
           type="text"
           placeholder="Search notes..."
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          style={{ width: "100%" }}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
@@ -220,24 +228,13 @@ function Sidebar({
         {folderTree.map(folder => renderFolder(folder))}
       </ul>
 
-      {/* Uncategorized notes */}
       {uncategorizedNotes.length > 0 && (
-        <div style={{ marginTop: "2rem" }}>
-          <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-            {uncategorizedNotes.map(note => (
-              <li key={note._id}>
-                <button
-                  onClick={() => openNote(note)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "blue",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    padding: 0,
-                    font: "inherit"
-                  }}
-                >
+        <div className="sidebar-section">
+          <h4>Notes</h4>
+          <ul className="sidebar-list">
+            {uncategorizedNotes.map((note) => (
+              <li key={note._id} className="sidebar-item">
+                <button className="note-button" onClick={() => openNote(note)}>
                   {note.title}
                 </button>
               </li>

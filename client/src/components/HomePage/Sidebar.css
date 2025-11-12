@@ -1,0 +1,148 @@
+/* === Sidebar general === */
+.sidebar {
+  width: 260px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  box-shadow: 4px 0 15px var(--shadow-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* === Header buttons === */
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === Buttons === */
+.btn-primary,
+.btn-secondary {
+  width: 100%;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+/* === Primary (New Note) === */
+.btn-primary {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* === Secondary (New Folder) === */
+.btn-secondary {
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+  background-color: var(--accent-color);
+  color: var(--button-text);
+}
+
+/* === Search field === */
+.sidebar-search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+}
+.sidebar-search input {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.sidebar-search input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-color);
+  outline: none;
+}
+
+/* === Sections === */
+.sidebar-section {
+  margin-top: 1.8rem;
+}
+.sidebar-section h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === Notes list === */
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-item {
+  margin-bottom: 0.4rem;
+}
+.note-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-align: left;
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+.note-button:hover {
+  background-color: var(--panel-bg);
+}
+
+/* === Scrollbar === */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-header {
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .sidebar-section {
+    margin-top: 1rem;
+  }
+}

@@ -1,8 +1,9 @@
-// src/components/HomePage/HomePage.js
-import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar';
-import MainContent from './MainContent';
+import React, { useState, useEffect } from "react";
+import Sidebar from "./Sidebar";
+import MainContent from "./MainContent";
 import NoteEditor from "./NoteEditors/NoteEditor";
+import "../../Theme.css"; // ✅ importa el tema global
+import "./HomePage.css";
 
 function HomePage() {
   const [notes, setNotes] = useState([]);
@@ -12,6 +13,14 @@ function HomePage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [editing, setEditing] = useState(false);
   const [currentFolder, setCurrentFolder] = useState(null);
+
+  // Mantener sincronía con el modo oscuro global
+  const [darkMode, setDarkMode] = useState(false);
+  useEffect(() => {
+    const isDark = localStorage.getItem("theme") === "dark";
+    setDarkMode(isDark);
+    document.body.classList.toggle("dark-mode", isDark);
+  }, []);
 
   // Fetch notes
   useEffect(() => {
@@ -30,7 +39,6 @@ function HomePage() {
       .then(data => setFolders(data))
       .catch(err => console.error("Error fetching folders:", err));
   }, []);
-
   
   const createNewNote = (folderId = null) => {
     setActiveNote(null);
@@ -99,13 +107,9 @@ function HomePage() {
     setShowSidebar(false);
   };
 
-
-  // Delete note from MongoDB
   const deleteNote = async (note) => {
     try {
-      await fetch(`/api/notes/${note._id}`, {
-        method: "DELETE",
-      });
+      await fetch(`/api/notes/${note._id}`, { method: "DELETE" });
       setNotes((prev) => prev.filter((n) => n._id !== note._id));
       setActiveNote(null);
       setEditing(false);
@@ -152,11 +156,24 @@ function HomePage() {
   };
 
   const filteredNotes = Array.isArray(notes)
-  ? notes.filter(note => (note.title || "").toLowerCase().includes(searchQuery.toLowerCase()))
-  : [];
+    ? notes.filter((note) =>
+        (note.title || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   return (
-    <div className="layout" style={{ display: "flex", marginTop: "2rem" }}>
+    <div
+      className={`layout ${darkMode ? "dark-mode" : ""}`}
+      style={{
+        display: "flex",
+        marginTop: "2rem",
+        backgroundColor: "var(--bg-color)",
+        color: "var(--text-color)",
+        transition: "background-color 0.3s ease, color 0.3s ease",
+      }}
+    >
       {showSidebar && (
         <Sidebar
           notes={filteredNotes}
@@ -172,11 +189,11 @@ function HomePage() {
 
       <div style={{ flex: 1, padding: "2rem" }}>
         {editing ? (
-          <NoteEditor 
-          note={activeNote} 
-          onSave={saveNote} 
-          onCancel={cancelEdit}
-          onDelete={deleteNote}
+          <NoteEditor
+            note={activeNote}
+            onSave={saveNote}
+            onCancel={cancelEdit}
+            onDelete={deleteNote}
           />
         ) : (
           <MainContent activeNote={activeNote} onEdit={startEditing} />

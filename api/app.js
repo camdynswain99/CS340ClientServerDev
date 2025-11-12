@@ -44,7 +44,7 @@ app.use('/testAPI', testAPIRouter);
 // API routes
 app.use('/api/notes', noteRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/generate', gpt2Route);
+app.use('/api/generate', gpt2Route); //now its used for ollama but I didnt want to change the name
 app.use('/api/ollama', ollamaRouter);
 app.use('/api/folders', folderRoutes);
 
