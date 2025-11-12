@@ -1,8 +1,7 @@
 // src/components/Sidebar.js
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import ".Sidebar.css";
+import "./Sidebar.css";
 import "../../Theme.css";
 
 // Helper: build folder hierarchy from flat list
