@@ -11,37 +11,80 @@ function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [currentFolder, setCurrentFolder] = useState(null);
 
-  // Fetch API example
+  // Fetch notes
   useEffect(() => {
     fetch("/api/notes")
-      .then(res => res.json())  // <— parse as JSON, not text
-      .then((data) => setNotes(data))
-      .catch((err) => console.error("Error fetching notes:", err)); 
+      .then(res => res.json())
+      .then(data => {
+        setNotes(Array.isArray(data) ? data : data.notes || []);
+      })
+      .catch(err => console.error("Error fetching notes:", err));
   }, []);
 
+  // Fetch folders
+  useEffect(() => {
+    fetch("/api/folders")
+      .then(res => res.json())
+      .then(data => setFolders(data))
+      .catch(err => console.error("Error fetching folders:", err));
+  }, []);
 
-  // Create a new note in MongoDB
-  const createNewNote = async () => {
+  
+  const createNewNote = (folderId = null) => {
+    setActiveNote(null);
+    setCurrentFolder(folderId);
+    setEditing(true);
+    setShowSidebar(false);
+  };
+
+  const saveNote = async (note) => {
+    if (!note) return;
+
     try {
-      // Send a POST request to the backend; content/title are required
+      const payload = {
+        title: note.title || "Untitled Note",
+        content: note.content || "",
+        parentFolder: currentFolder || null,
+        type: note.type || "quick"
+      };
+
       const res = await fetch("/api/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "Untitled Note",
-          content: "Start writing here...", // <-- cannot be empty
-          type: "quick",
-        }),
+        body: JSON.stringify(payload)
       });
 
-      const createdNote = await res.json(); // <-- This now has _id from MongoDB
-      setNotes(prev => [createdNote, ...prev]); // add to state
-      setActiveNote(createdNote);              // set as active note
-      setEditing(true);
-      setShowSidebar(false);
+      if (!res.ok) throw new Error("Failed to save note");
+
+      const savedNote = await res.json();
+
+      // Add note to flat notes array
+      
+
+      // If it has a folder, add note to that folder locally
+      if (savedNote.parentFolder?._id) {
+        setFolders(prevFolders => 
+          prevFolders.map(f => 
+            f._id === savedNote.parentFolder._id
+              ? { ...f, notes: f.notes ? [...f.notes, savedNote] : [savedNote] }
+              : f
+          )
+        );
+      }
+      else {
+        setNotes(prev => Array.isArray(prev) ? [...prev, savedNote] : [savedNote]);
+      }
+
+      setActiveNote(savedNote);
+      setEditing(false);
+      setShowSidebar(true);
+
+      console.log("Note saved:", savedNote);
+
     } catch (err) {
-      console.error("Error creating note:", err);
+      console.error("Error saving note:", err);
     }
   };
 
@@ -56,28 +99,6 @@ function HomePage() {
     setShowSidebar(false);
   };
 
-  // Save (update) note in MongoDB
-  const saveNote = async (updatedNote) => {
-    if (!updatedNote?._id) {
-      console.error("Cannot save note: missing _id");
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/notes/${updatedNote._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedNote),
-      });
-      const savedNote = await res.json();
-      setNotes(prev => prev.map(n => n._id === savedNote._id ? savedNote : n));
-      setActiveNote(savedNote);
-      setEditing(false);
-      setShowSidebar(true);
-    } catch (err) {
-      console.error("Error saving note:", err);
-    }
-  };
 
   // Delete note from MongoDB
   const deleteNote = async (note) => {
@@ -99,9 +120,35 @@ function HomePage() {
     setShowSidebar(true);
   };
 
-  const createNewFolder = () => {
-    const newFolder = { id: Date.now(), name: "New Folder" };
-    setFolders(prev => [...prev, newFolder]);
+  const createNewFolder = async (parentFolderId = null) => {
+    try {
+      const res = await fetch("/api/folders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "New Folder",
+          parentFolder: parentFolderId || null,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to create folder");
+      const newFolder = await res.json();
+
+      setFolders(prev => [...prev, newFolder]);
+      console.log("📁 Folder created:", newFolder);
+    } catch (err) {
+      console.error("Error creating folder:", err);
+    }
+  };
+
+
+  const deleteFolder = async (folderId) => {
+    try {
+      await fetch(`/api/folders/${folderId}`, { method: "DELETE" });
+      setFolders(prev => prev.filter(f => f._id !== folderId));
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+    }
   };
 
   const filteredNotes = Array.isArray(notes)
@@ -118,6 +165,7 @@ function HomePage() {
           setSearchQuery={setSearchQuery}
           createNewNote={createNewNote}
           createNewFolder={createNewFolder}
+          deleteFolder={deleteFolder}
           openNote={openNote}
         />
       )}

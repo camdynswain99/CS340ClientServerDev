@@ -12,6 +12,7 @@ const noteRoutes = require('./routes/noteRoutes');
 const authRoutes = require('./authenticationRoutes/RegistrationEndpoint');
 const gpt2Route = require('./routes/gpt2');
 const ollamaRouter = require('./routes/ollama');
+const folderRoutes = require('./routes/folderRoutes');
 
 // DB
 const connectDB = require('./config/db');
@@ -45,6 +46,7 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/generate', gpt2Route);
 app.use('/api/ollama', ollamaRouter);
+app.use('/api/folders', folderRoutes);
 
 // --- 404 handler ---
 app.use((req, res, next) => {
