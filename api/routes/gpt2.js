@@ -1,30 +1,90 @@
 const express = require('express');
-const axios = require('axios');
-
 const router = express.Router();
 
-// Proxy POST /api/generate -> Flask GPT-2 server at http://localhost:5001/generate
+//install ollama and run the command below to start the server
+//ollama run llama3.2 
+
+
 router.post('/', async (req, res) => {
-    //this console log helps debug incoming requests
-    console.log('Received /api/generate request with body:', req.body);
+  console.log('Received /api/generate request with body:', req.body);
+
   try {
-    // Forward the JSON body to the Flask server
-    const flaskRes = await axios.post('http://localhost:5001/generate', req.body, {
+    const ollamaUrl = 'http://localhost:11434/api/generate';
+    const ollamaRes = await fetch(ollamaUrl, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      timeout: 1200000000, // in ms - model generation can take longer
+      body: JSON.stringify(req.body),
     });
 
-    // Return whatever the Flask server returned
-    res.status(flaskRes.status).json(flaskRes.data);
-  } catch (err) {
-    // If Flask responded with an error, forward it
-    if (err.response) {
-      return res.status(err.response.status).json(err.response.data);
+    if (!ollamaRes.ok) {
+      const text = await ollamaRes.text();
+      console.error('Ollama returned non-OK status', ollamaRes.status, text);
+      return res.status(ollamaRes.status).send(text);
     }
 
-    // Network/other errors
-    console.error('Error proxying to GPT-2 Flask server:', err.message);
-    res.status(500).json({ message: 'Error contacting GPT-2 server', error: err.message });
+    // Ollama returns NDJSON (one JSON object per line). We'll parse the stream,
+    // accumulate the `response` pieces and return a single JSON object { response: fullText }
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let full = '';
+
+    // If body is not a stream (older Node or non-streaming), just read text
+    if (!ollamaRes.body || typeof ollamaRes.body.getReader !== 'function') {
+      const text = await ollamaRes.text();
+      // try to parse as NDJSON (multiple lines) or single JSON
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        try {
+          const obj = JSON.parse(line);
+          full += obj.response || obj.text || '';
+        } catch (e) {
+          // not JSON, append raw
+          full += line;
+        }
+      }
+      return res.json({ response: full });
+    }
+
+    const reader = ollamaRes.body.getReader();
+    while (true) {
+      const { value, done } = await reader.read();
+      if (value) {
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep last partial line
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          try {
+            const obj = JSON.parse(trimmed);
+            full += obj.response || obj.text || '';
+            if (obj.done) {
+              // when done flag appears, return accumulated text
+              return res.json({ response: full });
+            }
+          } catch (e) {
+            // ignore parse errors for partial data
+          }
+        }
+      }
+      if (done) break;
+    }
+
+    // flush any remaining partial buffer
+    if (buffer.trim()) {
+      try {
+        const obj = JSON.parse(buffer.trim());
+        full += obj.response || obj.text || '';
+      } catch (e) {
+        full += buffer;
+      }
+    }
+
+    return res.json({ response: full });
+  } catch (err) {
+    console.error('Error proxying to Ollama API:', err);
+    res.status(500).json({ message: 'Error contacting Ollama API', error: err.message });
   }
 });
 

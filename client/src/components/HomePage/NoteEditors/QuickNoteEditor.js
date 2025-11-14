@@ -6,6 +6,7 @@ export default function QuickNoteEditor({ note, onSave, onCancel, onDelete }) {
   const [title, setTitle] = useState(note?.title || "Untitled Quick Note");
   const [content, setContent] = useState(note?.content || "");
   const [darkMode, setDarkMode] = useState(false);
+  const [formatting, setFormatting] = useState(false);
 
   useEffect(() => {
     setTitle(note?.title || "Untitled Quick Note");
@@ -17,6 +18,39 @@ export default function QuickNoteEditor({ note, onSave, onCancel, onDelete }) {
   }, [note]);
 
   const handleSave = () => onSave({ title, content });
+
+  const handleFormat = async () => {
+    try {
+      setFormatting(true);
+      const prompt =
+        "Format these notes with bullets, indents, and line spaces where needed. Do not add any information and respond with the formatted notes only:\n\n" +
+        content;
+
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "llama3.2:latest", prompt }),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("Format error", res.status, txt);
+        return;
+      }
+
+      const json = await res.json().catch(() => null);
+      if (json && typeof json.response === "string") {
+        setContent(json.response);
+      } else {
+        const txt = json ? JSON.stringify(json) : await res.text().catch(() => "");
+        setContent(txt);
+      }
+    } catch (err) {
+      console.error("handleFormat error", err);
+    } finally {
+      setFormatting(false);
+    }
+  };
 
   return (
     <div
@@ -46,6 +80,9 @@ export default function QuickNoteEditor({ note, onSave, onCancel, onDelete }) {
       />
 
       <div className="quick-editor-buttons">
+        <button className="format-btn" onClick={handleFormat} disabled={formatting}>
+          {formatting ? "Formatting..." : "Format"}
+        </button>
         <button className="save-btn" onClick={handleSave}>
           Save
         </button>
