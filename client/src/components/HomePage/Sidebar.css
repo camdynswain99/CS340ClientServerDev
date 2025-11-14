@@ -1,19 +1,21 @@
-/* === Sidebar general === */
+/* === Sidebar General === */
 .sidebar {
   width: 260px;
+  flex-shrink: 0; /* prevent shrinking */
+  height: 100vh;
   background-color: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
-  backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
   box-shadow: 4px 0 15px var(--shadow-color);
   color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-y: auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* === Header buttons === */
+/* === Header Buttons === */
 .sidebar-header {
   display: flex;
   flex-direction: column;
@@ -21,7 +23,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* === Buttons === */
 .btn-primary,
 .btn-secondary {
   width: 100%;
@@ -33,7 +34,7 @@
   font-size: 0.9rem;
 }
 
-/* === Primary (New Note) === */
+/* Primary (New Note) */
 .btn-primary {
   background-color: var(--button-bg);
   color: var(--button-text);
@@ -44,7 +45,7 @@
   opacity: 0.9;
 }
 
-/* === Secondary (New Folder) === */
+/* Secondary (New Folder) */
 .btn-secondary {
   background-color: var(--panel-bg);
   color: var(--text-color);
@@ -55,10 +56,8 @@
   color: var(--button-text);
 }
 
-/* === Search field === */
+/* === Search Field === */
 .sidebar-search {
-  display: flex;
-  justify-content: center;
   margin-bottom: 1.2rem;
 }
 .sidebar-search input {
@@ -76,28 +75,17 @@
   outline: none;
 }
 
-/* === Sections === */
-.sidebar-section {
-  margin-top: 1.8rem;
-}
-.sidebar-section h4 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* === Notes list === */
-.sidebar-list {
+/* === Folder List & Notes === */
+.sidebar ul {
   list-style: none;
-  padding: 0;
+  padding-left: 0;
   margin: 0;
 }
-.sidebar-item {
+
+.sidebar li {
   margin-bottom: 0.4rem;
 }
+
 .note-button {
   background: none;
   border: none;
@@ -106,12 +94,61 @@
   font-size: 0.95rem;
   text-align: left;
   width: 100%;
-  padding: 0.5rem 0.8rem;
-  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
   transition: background-color 0.2s ease;
 }
+
 .note-button:hover {
-  background-color: var(--panel-bg);
+  background-color: var(--panel-hover-bg);
+}
+
+.folder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+}
+
+.folder-header:hover {
+  background-color: var(--panel-hover-bg);
+}
+
+.folder-buttons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 0.25rem;
+}
+
+.folder-buttons .add-btn {
+  color: green;
+}
+
+.folder-buttons .delete-btn {
+  color: red;
+}
+
+/* Dropdown for + */
+.folder-dropdown {
+  margin-top: 0.25rem;
+  margin-left: 1rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem;
+  z-index: 10;
+  position: relative;
+}
+
+.folder-dropdown button {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.25rem;
 }
 
 /* === Scrollbar === */
@@ -130,6 +167,7 @@
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
+    height: auto;
     flex-direction: row;
     overflow-x: auto;
     border-right: none;
@@ -140,9 +178,5 @@
     flex-direction: row;
     gap: 0.5rem;
     margin-bottom: 0;
-  }
-
-  .sidebar-section {
-    margin-top: 1rem;
   }
 }

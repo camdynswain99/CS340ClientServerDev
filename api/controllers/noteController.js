@@ -5,7 +5,7 @@ const Folder = require('../models/Folder');
 // Get all notes
 exports.getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user._id }).populate("folder");
+    const notes = await Note.find({ user: req.user._id }).populate("parentFolder");
     res.json(notes);
   } catch (err) {
     console.error("Error fetching notes:", err);
@@ -66,17 +66,25 @@ exports.updateNote = async (req, res) => {
 // Delete note
 exports.deleteNote = async (req, res) => {
   try {
-    if (!req.params.id) return res.status(400).json({ error: "Note ID is required" });
-    const deleted = await Note.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
 
-    if (!deleted) return res.status(404).json({ error: "Note not found" });
-    
-    res.json({ message: "Note deleted" });
+    // Find the note first
+    const note = await Note.findById(id);
+    if (!note) return res.status(404).json({ error: "Note not found" });
+
+    // If the note is in a folder, remove it from that folder's notes array
+    if (note.parentFolder) {
+      await Folder.findByIdAndUpdate(note.parentFolder, {
+        $pull: { notes: note._id },
+      });
+    }
+
+    // Delete the note from the database
+    await Note.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Note deleted successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: "Failed to delete note" });
+    console.error("Error deleting note:", err);
+    res.status(500).json({ error: "Failed to delete note" });
   }
 };
-
-
-

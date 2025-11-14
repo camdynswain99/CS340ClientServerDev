@@ -39,7 +39,6 @@ function Sidebar({
   const [activeDropdown, setActiveDropdown] = useState(null); // track which folder’s + is open
   const [darkMode, setDarkMode] = useState(false);
   
-  // 🔄 Detectar modo oscuro global
   useEffect(() => {
     const isDark = localStorage.getItem("theme") === "dark";
     setDarkMode(isDark);
@@ -72,118 +71,37 @@ function Sidebar({
 
   // Recursive render
   const renderFolder = (folder) => (
-    <li key={folder._id} style={{ marginBottom: "0.75rem" }}>
-      <div
-        onClick={() => toggleFolder(folder._id)}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        <span>
-          {openFolders[folder._id] ? "📂" : "📁"} {folder.name}
-        </span>
-
-        <div>
-          {/* + button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddClick(folder._id);
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "green",
-              cursor: "pointer",
-              fontSize: "1rem",
-              marginRight: "0.25rem"
-            }}
-          >
-            +
-          </button>
-          {/* delete button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteFolder(folder._id);
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "red",
-              cursor: "pointer",
-              fontSize: "1rem",
-            }}
-          >
-            ✕
-          </button>
+    <li key={folder._id} className="folder-item">
+      <div className="folder-header" onClick={() => toggleFolder(folder._id)}>
+        <span>{openFolders[folder._id] ? "📂" : "📁"} {folder.name}</span>
+        <div className="folder-actions">
+          <button className="btn-add" onClick={(e) => { e.stopPropagation(); handleAddClick(folder._id); }}>+</button>
+          <button className="btn-delete" onClick={(e) => { e.stopPropagation(); deleteFolder(folder._id); }}>✕</button>
         </div>
       </div>
 
       {/* dropdown for + */}
       {activeDropdown === folder._id && (
-        <div
-          style={{
-            marginTop: "0.25rem",
-            marginLeft: "1rem",
-            background: "#fff",
-            border: "1px solid #ccc",
-            borderRadius: "6px",
-            padding: "0.5rem",
-            zIndex: 10,
-            position: "relative"
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => handleCreateInFolder(folder._id, "note")}
-            style={{ display: "block", width: "100%", marginBottom: "0.25rem" }}
-          >
-            ➕ New Note
-          </button>
-          <button
-            onClick={() => handleCreateInFolder(folder._id, "folder")}
-            style={{ display: "block", width: "100%" }}
-          >
-            📁 New Folder
-          </button>
+        <div className="folder-dropdown" onClick={(e) => e.stopPropagation()}>
+          <button onClick={() => handleCreateInFolder(folder._id, "note")}>➕ New Note</button>
+          <button onClick={() => handleCreateInFolder(folder._id, "folder")}>📁 New Folder</button>
         </div>
       )}
 
       {/* nested contents */}
       {openFolders[folder._id] && (
-        <ul style={{ listStyle: "none", paddingLeft: "1rem", marginTop: "0.5rem" }}>
-          {/* subfolders */}
-          {folder.subfolders && folder.subfolders.length > 0 && (
-            folder.subfolders.map(sub => renderFolder(sub))
-          )}
-
-          {/* notes in this folder */}
+        <ul className="folder-contents">
+          {folder.subfolders && folder.subfolders.map(sub => renderFolder(sub))}
           {folder.notes && folder.notes.length > 0 ? (
             folder.notes.map(note => (
-              <li key={note._id}>
-                <button
-                  onClick={() => openNote(note)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "blue",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    padding: 0,
-                    font: "inherit"
-                  }}
-                >
+              <li key={note._id} className="note-item">
+                <button className="note-button" onClick={() => openNote(note)}>
                   {note.title || "Untitled"}
                 </button>
               </li>
             ))
           ) : (
-            <li style={{ color: "#777" }}>No notes yet</li>
+            <li className="empty-folder">No notes yet</li>
           )}
         </ul>
       )}
@@ -191,28 +109,13 @@ function Sidebar({
   );
 
   return (
-    <div 
-      className={`sidebar ${darkMode ? "dark-mode" : ""}`} 
-      style={{ 
-        width: "250px", 
-        padding: "1rem", 
-        borderRight: "1px solid #ccc",
-        overflowY: "auto",
-        height: "100vh"
-        }}
-      >
-
-      {/* --- Buttons --- */}
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => createNewNote(null)} style={{ width: "100%" }}>New Note</button>
+     <div className={`sidebar ${darkMode ? "dark-mode" : ""}`}>
+      <div className="sidebar-header">
+        <button className="btn-primary" onClick={() => createNewNote(null)}>New Note</button>
+        <button className="btn-secondary" onClick={() => createNewFolder(null)}>New Folder</button>
       </div>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => createNewFolder(null)} style={{ widtch: "100%" }}>Create Folder</button>
-      </div>
-
-      {/* --- Search Bar --- */}
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="sidebar-search">
         <input
           type="text"
           placeholder="Search notes..."
@@ -221,9 +124,7 @@ function Sidebar({
         />
       </div>
 
-      {/* --- Folders Section --- */}
-      {/* Render the tree recursively */}
-      <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+      <ul className="folder-list">
         {folderTree.map(folder => renderFolder(folder))}
       </ul>
 

@@ -1,34 +1,32 @@
 /* === Layout principal === */
 .layout {
   display: flex;
-  height: calc(100vh - 4rem);
+  height: calc(100vh - 4rem); /* leave space for top nav if needed */
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* === Contenedor principal (zona de notas) === */
-.layout > div {
+/* Main content area */
+.main-content {
   flex: 1;
   padding: 2rem;
   background-color: var(--panel-bg);
   color: var(--text-color);
   border-left: 1px solid var(--border-color);
+  overflow-y: auto;
+  min-width: 0; /* fix flex shrinking issues */
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* === Titulares === */
-h2,
-h3,
-h4 {
+/* Titles */
+h2, h3, h4 {
   color: var(--text-color);
   transition: color 0.3s ease;
 }
 
-/* === Inputs, Textareas, botones dentro del contenido === */
-input,
-textarea,
-select {
+/* Inputs / Textareas / Selects */
+input, textarea, select {
   background-color: var(--panel-bg);
   color: var(--text-color);
   border: 1px solid var(--border-color);
@@ -37,15 +35,13 @@ select {
   transition: all 0.3s ease;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
+input:focus, textarea:focus, select:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 8px var(--accent-color);
   outline: none;
 }
 
-/* === Botones generales === */
+/* Buttons */
 button {
   background-color: var(--button-bg);
   color: var(--button-text);
@@ -60,7 +56,7 @@ button:hover {
   opacity: 0.9;
 }
 
-/* === Contenedor vacío o mensaje de bienvenida === */
+/* Empty state / welcome message */
 .empty-state {
   text-align: center;
   color: var(--text-color);
@@ -68,7 +64,7 @@ button:hover {
   padding: 3rem;
 }
 
-/* === Scrollbar estilizado === */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -82,14 +78,14 @@ button:hover {
   background: var(--accent-color);
 }
 
-/* === Responsive === */
+/* Responsive */
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
     height: auto;
   }
 
-  .layout > div {
+  .main-content {
     padding: 1rem;
     border-left: none;
     border-top: 1px solid var(--border-color);

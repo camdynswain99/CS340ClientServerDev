@@ -1,15 +1,16 @@
 // config/db.js
 const mongoose = require('mongoose');
+require('dotenv').config(); // Load .env variables
 
 // Function to connect to MongoDB
 const connectDB = async () => {
   try {
-    // MongoDB URI for local development
-    const conn = await mongoose.connect('mongodb://localhost:27017/userDB', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is not defined in .env");
+    }
+
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);

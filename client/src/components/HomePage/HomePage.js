@@ -164,16 +164,7 @@ function HomePage() {
     : [];
 
   return (
-    <div
-      className={`layout ${darkMode ? "dark-mode" : ""}`}
-      style={{
-        display: "flex",
-        marginTop: "2rem",
-        backgroundColor: "var(--bg-color)",
-        color: "var(--text-color)",
-        transition: "background-color 0.3s ease, color 0.3s ease",
-      }}
-    >
+    <div className={`layout ${darkMode ? "dark-mode" : ""}`}>
       {showSidebar && (
         <Sidebar
           notes={filteredNotes}
@@ -187,7 +178,7 @@ function HomePage() {
         />
       )}
 
-      <div style={{ flex: 1, padding: "2rem" }}>
+      <div className="main-content">
         {editing ? (
           <NoteEditor
             note={activeNote}
