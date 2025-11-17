@@ -23,14 +23,14 @@ const Navbar = ({ isAuthenticated, onSignOut }) => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link to="/">Notes</Link>
+        <Link to="/">LlamaWrite</Link>
       </div>
 
       <ul className="navbar-menu">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/about">About</Link></li>
         <li><Link to="/services">Services</Link></li>
-        <li><Link to="/gpt2testpage">GPT2 Test</Link></li>
+        <li><Link to="/gpt2testpage">Talk to Llama</Link></li>
 
         {!isAuthenticated && <li><Link to="/signin">Sign In</Link></li>}
         {!isAuthenticated && <li><Link to="/signup">Sign Up</Link></li>}

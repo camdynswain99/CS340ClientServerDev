@@ -52,7 +52,14 @@ function GPT2TestPage() {
         return;
       }
 
-      if (res.body && typeof res.body.getReader === "function") {
+      // Prefer JSON: our proxy now returns { response: "..." }
+      const contentType = res.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const json = await res.json();
+        // set the inner string (fall back to stringified JSON if unexpected shape)
+        setResponse(json.response ?? JSON.stringify(json));
+      } else if (res.body && typeof res.body.getReader === "function") {
+        // Fallback: streaming plain-text response
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let fullText = "";
@@ -66,7 +73,13 @@ function GPT2TestPage() {
         }
       } else {
         const txt = await res.text();
-        setResponse(txt);
+        // If it's raw JSON text, try to parse and extract .response
+        try {
+          const parsed = JSON.parse(txt);
+          setResponse(parsed.response ?? JSON.stringify(parsed));
+        } catch (e) {
+          setResponse(txt);
+        }
       }
     } catch (err) {
       console.error("handleGenerate error", err);
