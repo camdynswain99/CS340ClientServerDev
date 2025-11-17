@@ -1,3 +1,5 @@
+//NoteEditor.js
+
 import React, { useState, useEffect } from "react";
 import QuickNoteEditor from "./QuickNoteEditor";
 import ClassNoteEditor from "./ClassNoteEditor";

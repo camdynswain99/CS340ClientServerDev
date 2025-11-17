@@ -5,7 +5,8 @@ const Folder = require('../models/Folder');
 // Get all notes
 exports.getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user._id }).populate("parentFolder");
+    // const notes = await Note.find({ user: req.user._id }).populate("parentFolder");
+    const notes = await Note.find({ parentFolder: null });
     res.json(notes);
   } catch (err) {
     console.error("Error fetching notes:", err);

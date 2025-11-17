@@ -1,8 +1,10 @@
+//HomePage.js
+
 import React, { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import MainContent from "./MainContent";
 import NoteEditor from "./NoteEditors/NoteEditor";
-import "../../Theme.css"; // ✅ importa el tema global
+import "../../Theme.css"; 
 import "./HomePage.css";
 
 function HomePage() {
@@ -110,7 +112,25 @@ function HomePage() {
   const deleteNote = async (note) => {
     try {
       await fetch(`/api/notes/${note._id}`, { method: "DELETE" });
-      setNotes((prev) => prev.filter((n) => n._id !== note._id));
+      // Remove from flat notes list (uncategorized notes)
+      setNotes(prev => prev.filter(n => n._id !== note._id));
+
+      // Remove from its folder
+      if (note.parentFolder && note.parentFolder._id) {
+        setFolders(prevFolders =>
+          prevFolders.map(folder =>
+            folder._id === note.parentFolder._id
+              ? {
+                  ...folder,
+                  notes: folder.notes.filter(n => n._id !== note._id)
+                }
+              : folder
+          )
+        );
+      }
+
+
+      // Reset UI
       setActiveNote(null);
       setEditing(false);
       setShowSidebar(true);

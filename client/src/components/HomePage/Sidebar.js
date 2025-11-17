@@ -1,6 +1,6 @@
 // src/components/Sidebar.js
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import "./Sidebar.css";
 import "../../Theme.css";
 
@@ -34,7 +34,7 @@ function Sidebar({
   deleteFolder,
   openNote 
 }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [openFolders, setOpenFolders] = useState({});
   const [activeDropdown, setActiveDropdown] = useState(null); // track which folder’s + is open
   const [darkMode, setDarkMode] = useState(false);
