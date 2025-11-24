@@ -6,8 +6,8 @@ const folderController = require('../controllers/folderController');
 // Routes
 router.get('/', folderController.getFolders);
 router.post('/', folderController.createFolder);
-router.put('/:id', folderController.updateFolder);
+router.put('/:id', folderController.renameFolder);
 router.delete('/:id', folderController.deleteFolder);
-router.post("/:folderId/note", folderController.addNote);
+router.post("/:id/note", folderController.addNote);
 
 module.exports = router;

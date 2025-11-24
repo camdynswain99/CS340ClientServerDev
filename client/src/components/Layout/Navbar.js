@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
-import "../Theme.css"; // ✅ correcto
 
 const Navbar = ({ isAuthenticated, onSignOut }) => {
   const [darkMode, setDarkMode] = useState(false);
 
-  // Cargar el modo guardado
+  // Load saved theme on mount
   useEffect(() => {
     const savedMode = localStorage.getItem("theme");
     const isDark = savedMode === "dark";
@@ -14,7 +13,7 @@ const Navbar = ({ isAuthenticated, onSignOut }) => {
     document.body.classList.toggle("dark-mode", isDark);
   }, []);
 
-  // Aplicar y guardar el modo cada vez que cambia
+  // Apply and save theme on change
   useEffect(() => {
     document.body.classList.toggle("dark-mode", darkMode);
     localStorage.setItem("theme", darkMode ? "dark" : "light");
@@ -27,11 +26,13 @@ const Navbar = ({ isAuthenticated, onSignOut }) => {
       </div>
 
       <ul className="navbar-menu">
+        {/* Main Links */}
         <li><Link to="/">Home</Link></li>
         <li><Link to="/about">About</Link></li>
         <li><Link to="/services">Services</Link></li>
         <li><Link to="/gpt2testpage">Talk to Llama</Link></li>
 
+        {/* Auth Links */}
         {!isAuthenticated && <li><Link to="/signin">Sign In</Link></li>}
         {!isAuthenticated && <li><Link to="/signup">Sign Up</Link></li>}
         {isAuthenticated && <li><Link to="/YourNotesPage">Dashboard</Link></li>}
@@ -43,11 +44,11 @@ const Navbar = ({ isAuthenticated, onSignOut }) => {
           </li>
         )}
 
-        {/* 🌙 Toggle modo oscuro clásico */}
+        {/* Dark Mode Toggle */}
         <li>
           <button
             className="toggle-darkmode"
-            onClick={() => setDarkMode((prev) => !prev)}
+            onClick={() => setDarkMode(prev => !prev)}
             aria-label="Toggle dark mode"
           >
             {darkMode ? "☀️" : "🌙"}

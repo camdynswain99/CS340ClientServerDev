@@ -5,8 +5,8 @@ import "./Theme.css"; // ✅ Importamos el tema global aquí también
 import { Routes, Route, useNavigate } from "react-router-dom"; // no BrowserRouter aquí
 
 // Components
-import Navbar from "./components/Navbar";
-import HomePage from "./components/HomePage/HomePage";
+import Navbar from "./components/Layout/Navbar.js";
+import HomePage from "./pages/HomePage.js";
 import PrivateRoute from "./SignInComponents/PrivateRouteLogin.jsx";
 
 // Pages

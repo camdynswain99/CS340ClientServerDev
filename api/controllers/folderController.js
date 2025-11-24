@@ -55,12 +55,28 @@ exports.addNote = async (req, res) => {
 };
 
 // Update folder name
-exports.updateFolder = async (req, res) => {
+exports.renameFolder = async (req, res) => {
   try {
-    const updated = await Folder.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updated);
+    const { id } = req.params;
+    const { newName } = req.body;
+
+    if (!newName || newName.trim() === "") {
+      return res.status(400).json({ message: "Folder name cannot be empty" });
+    }
+
+    const folder = await Folder.findByIdAndUpdate(
+      id,
+      { name: newName },
+      { new: true }
+    );
+
+    if (!folder) {
+      return res.status(404).json({ message: "Folder not found" });
+    }
+
+    res.json(folder);
   } catch (err) {
-    res.status(400).json({ error: "Failed to update folder" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
