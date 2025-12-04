@@ -58,9 +58,14 @@ router.post('/login', async (req, res) => {
     // Makes a JWT token and sets it as an HttpOnly cookie and sends it to client
       const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
 
+      // mark the cookie as secure when the original request was HTTPS.
+      // When behind Cloudflare, Express with `trust proxy` will set req.secure
+      // correctly; additionally check x-forwarded-proto header as a fallback.
+      const isSecure = req.secure || (req.headers['x-forwarded-proto'] === 'https') || (process.env.NODE_ENV === 'production');
+
       res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: !!isSecure,
         sameSite: 'lax',
         maxAge: 60 * 60 * 1000,
       });
@@ -76,9 +81,10 @@ router.post('/login', async (req, res) => {
 
 //logout endpoint
 router.post('/logout', (req, res) => {
+  const isSecure = req.secure || (req.headers['x-forwarded-proto'] === 'https') || (process.env.NODE_ENV === 'production');
   res.clearCookie('token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: !!isSecure,
     sameSite: 'lax',
   });
   res.json({ message: 'Logged out' });

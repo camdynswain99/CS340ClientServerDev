@@ -7,6 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 
 /**
  * Get port from environment and store in Express.
@@ -16,16 +18,31 @@ var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Create HTTP or HTTPS server depending on available origin cert/key.
+ * To use HTTPS with Cloudflare Origin CA, set ORIGIN_CERT and ORIGIN_KEY
+ * env vars to file paths containing the certificate and private key.
  */
 
-var server = http.createServer(app);
+var server;
+if (process.env.ORIGIN_CERT && process.env.ORIGIN_KEY) {
+  try {
+    var cert = fs.readFileSync(process.env.ORIGIN_CERT);
+    var key = fs.readFileSync(process.env.ORIGIN_KEY);
+    server = https.createServer({ cert: cert, key: key }, app);
+    console.log('Starting HTTPS server with provided origin certificate');
+  } catch (err) {
+    console.error('Failed to read origin cert/key, falling back to HTTP:', err);
+    server = http.createServer(app);
+  }
+} else {
+  server = http.createServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(port, '0.0.0.0');
 server.on('error', onError);
 server.on('listening', onListening);
 

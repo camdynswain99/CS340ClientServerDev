@@ -35,7 +35,6 @@ const Navbar = ({ isAuthenticated, onSignOut }) => {
         {/* Auth Links */}
         {!isAuthenticated && <li><Link to="/signin">Sign In</Link></li>}
         {!isAuthenticated && <li><Link to="/signup">Sign Up</Link></li>}
-        {isAuthenticated && <li><Link to="/YourNotesPage">Dashboard</Link></li>}
         {isAuthenticated && (
           <li>
             <button className="SignOutButton" onClick={onSignOut}>

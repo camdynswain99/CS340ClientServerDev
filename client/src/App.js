@@ -85,31 +85,53 @@ export default function AppWithRouter(props) {
         <Route
           path="/"
           element={
-            <HomePage
-              {...props}
-              navigate={navigate}
-              isAuthenticated={userIsLoggedIn}
-            />
+            <PrivateRoute isAuthenticated={userIsLoggedIn}>
+              <HomePage
+                {...props}
+                navigate={navigate}
+                isAuthenticated={userIsLoggedIn}
+              />
+            </PrivateRoute>
           }
         />
 
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/about" element={<About />} />
+        <Route
+          path="/contact"
+          element={
+            <PrivateRoute isAuthenticated={userIsLoggedIn}>
+              <Contact />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <PrivateRoute isAuthenticated={userIsLoggedIn}>
+              <Services />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PrivateRoute isAuthenticated={userIsLoggedIn}>
+              <About />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/gpt2testpage"
+          element={
+            <PrivateRoute isAuthenticated={userIsLoggedIn}>
+              <GPT2TestPage />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/signin"
           element={<SignIn onAuthSuccess={() => setUserIsLoggedIn(true)} />}
         />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/gpt2testpage" element={<GPT2TestPage />} />
-        <Route
-          path="/YourNotesPage"
-          element={
-            <PrivateRoute isAuthenticated={userIsLoggedIn}>
-              <HiddenNotesPage />
-            </PrivateRoute>
-          }
-        />
       </Routes>
     </>
   );

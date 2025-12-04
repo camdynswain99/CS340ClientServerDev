@@ -1,7 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import SignIn from "./SignIn";
 
 function PrivateRoute({ isAuthenticated, children }) {
-  return isAuthenticated ? children : <Navigate to={SignIn} />;
+  // If authenticated, render children; otherwise redirect to /signin
+  return isAuthenticated ? children : <Navigate to="/signin" replace />;
 }
+
 export default PrivateRoute;
