@@ -33,7 +33,7 @@ app.use((req, res, next) => {
   } catch (err) {
     console.warn('Bad request path (invalid percent-encoding):', req.path);
     // respond with a safe 400 instead of letting Express crash
-    return res.status(400).send('Bad request');
+    return res.status(400).json({ message: "Bad request" });
   }
 });
 

@@ -2,12 +2,13 @@
 const express = require('express');
 const router = express.Router();
 const folderController = require('../controllers/folderController');
+const verifyToken = require("../middleware/verifyToken");
 
 // Routes
-router.get('/', folderController.getFolders);
-router.post('/', folderController.createFolder);
-router.put('/:id', folderController.renameFolder);
-router.delete('/:id', folderController.deleteFolder);
-router.post("/:id/note", folderController.addNote);
+router.get('/', verifyToken, folderController.getFolders);
+router.post('/', verifyToken, folderController.createFolder);
+router.put('/:id', verifyToken, folderController.renameFolder);
+router.delete('/:id', verifyToken, folderController.deleteFolder);
+router.post('/:id/note', verifyToken, folderController.addNote);
 
 module.exports = router;

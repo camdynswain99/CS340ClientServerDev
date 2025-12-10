@@ -1,3 +1,5 @@
+// middleware/verifyToken.js
+
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret';

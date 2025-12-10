@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const verifyToken = require('../middleware/verifyToken');
 
 
+
 //This handles login, registration, logout, and getting current user info
 
 // Secret for JWT signing - in production set process.env.JWT_SECRET

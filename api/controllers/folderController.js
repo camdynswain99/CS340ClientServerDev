@@ -5,9 +5,13 @@ const Note = require('../models/Note');
 // Get all top-level folders (and optionally populate contents)
 exports.getFolders = async (req, res) => {
   try {
-    const folders = await Folder.find({ parentFolder: null })
+    const folders = await Folder.find({ 
+      userId: req.user.id,
+      parentFolder: null 
+    })
       .populate("notes")
       .populate("subfolders");
+
     res.json(folders);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch folders" });
@@ -18,14 +22,20 @@ exports.getFolders = async (req, res) => {
 exports.createFolder = async (req, res) => {
   try {
     const { name, parentFolder } = req.body;
-    const folder = new Folder({ name, parentFolder: parentFolder || null });
+
+    const folder = new Folder({ 
+      name, 
+      parentFolder: parentFolder || null,
+      userId: req.user.id
+    });
     await folder.save();
 
     // If creating a subfolder, push it into parentFolder.subfolders
     if (parentFolder) {
-      await Folder.findByIdAndUpdate(parentFolder, {
-        $push: { subfolders: folder._id }
-      });
+      await Folder.findOneAndUpdate(
+        { _id: parentFolder, userId: req.user.id },  // restrict
+        { $push: { subfolders: folder._id } }
+      );
     }
     res.json(folder);
   } catch (err) {
@@ -40,7 +50,22 @@ exports.addNote = async (req, res) => {
     const { folderId } = req.params;
     const { title, content } = req.body;
 
-    const note = new Note({ title, content, folder: folderId });
+    // Ensure folder belongs to user
+    const folder = await Folder.findOne({
+      _id: folderId,
+      userId: req.user.id
+    });
+
+    if (!folder) {
+      return res.status(404).json({ error: "Folder not found" });
+    }
+
+    const note = new Note({ 
+      title, 
+      content, 
+      parentFolder: folderId,
+      userId: req.user.id 
+    });
     await note.save();
 
     await Folder.findByIdAndUpdate(folderId, {
@@ -64,8 +89,8 @@ exports.renameFolder = async (req, res) => {
       return res.status(400).json({ message: "Folder name cannot be empty" });
     }
 
-    const folder = await Folder.findByIdAndUpdate(
-      id,
+    const folder = await Folder.findOneAndUpdate(
+      { _id: id, userId: req.user.id }, // restrict
       { name: newName },
       { new: true }
     );
@@ -85,17 +110,27 @@ exports.deleteFolder = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Optionally remove subfolders and notes
-    const folder = await Folder.findById(id);
+    // Ensure folder belongs to user
+    const folder = await Folder.findOne({
+      _id: id,
+      userId: req.user.id
+    });
+
     if (!folder) return res.status(404).json({ error: "Folder not found" });
 
-    // Delete all notes in this folder
-    await Note.deleteMany({ _id: { $in: folder.notes } });
+    // Delete notes inside this folder belonging to this user
+    await Note.deleteMany({
+      _id: { $in: folder.notes },
+      userId: req.user.id
+    });
 
-    // Delete all subfolders (recursively, if needed)
-    await Folder.deleteMany({ parentFolder: folder._id });
+    // Delete subfolders belonging to this user
+    await Folder.deleteMany({
+      parentFolder: folder._id,
+      userId: req.user.id
+    });
 
-    // Delete the folder itself
+    // Delete folder itself
     await Folder.findByIdAndDelete(id);
 
     res.json({ message: "Folder and contents deleted" });

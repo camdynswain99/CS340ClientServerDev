@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './SignUp.module.css';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
     const [formData, setFormData] = useState({
@@ -25,6 +25,7 @@ function SignUp() {
                 const res = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(formData),
                 });
 
