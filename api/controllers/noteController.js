@@ -5,8 +5,9 @@ const Folder = require('../models/Folder');
 // Get all notes
 exports.getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ userId: req.user._id }).populate("parentFolder");
-    //const notes = await Note.find({ parentFolder: null });
+    // `verifyToken` sets `req.user.id` (not `_id`). Use that to restrict notes to the
+    // authenticated user so users cannot see other users' notes.
+    const notes = await Note.find({ userId: req.user.id }).populate("parentFolder");
     res.json(notes);
   } catch (err) {
     console.error("Error fetching notes:", err);
